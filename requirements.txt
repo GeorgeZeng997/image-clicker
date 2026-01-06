@@ -1,0 +1,4 @@
+opencv-python
+mss
+pillow
+pynput
