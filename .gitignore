@@ -5,3 +5,5 @@ templates/
 config.json
 *.log
 .DS_Store
+build/
+dist/
