@@ -1,4 +1,5 @@
-opencv-python
-mss
-pillow
-pynput
+numpy>=1.24.0
+opencv-python>=4.8.0
+mss>=9.0.0
+pillow>=10.0.0
+pynput>=1.7.6
