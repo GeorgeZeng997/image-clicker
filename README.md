@@ -1,68 +1,67 @@
-# Image Clicker GUI
+# Image Clicker (Desktop GUI + Headless CLI)
 
-Image Clicker GUI is a small desktop tool that lets you capture on-screen templates
-and automatically click when those templates are detected. It runs entirely on your
-local machine and scans the full screen at a fixed interval.
+**Image Clicker** is a High-DPI-aware OpenCV template-matching automation tool with both an interactive **Tkinter Desktop GUI** and a scriptable **Headless CLI** (featuring batch template-directory queues, `--dry-run` coordinate preview, JSON output, and a top-left `(0, 0)` emergency cursor fail-safe).
 
-## Features
-- Capture a template directly from the screen.
-- Match templates with a configurable threshold.
-- Click modes: match center or fixed manual coordinates.
-- Click customization: button, single/double, delay, jitter.
-- Optional "stop all on match" per template.
-- Auto right-click toggle.
-- Live preview of the selected template.
+---
 
-## Requirements
-- Windows 10/11
-- Python 3.9+
+## Key Features
 
-Python packages:
-- opencv-python
-- mss
-- pillow
-- pynput
+- **Per-Monitor High-DPI Awareness**: Automatically enables Windows Per-Monitor DPI Awareness (`SetProcessDpiAwareness`) so physical screen captures (`mss`) and cursor coordinates (`pynput`) stay pixel-accurate at 125% / 150% / 200% scaling.
+- **Interactive Screen Capture & File Import**: Drag-select regions directly from your screen or batch-import existing `.png/.jpg/.bmp/.webp` template assets into an ordered matching queue.
+- **Dry-Run Preview Mode (GUI & CLI)**: Inspect matched template names, `TM_CCOEFF_NORMED` confidence scores, and `(x, y)` click targets without moving or clicking the mouse.
+- **Emergency Top-Left `(0, 0)` Fail-Safe**: Slamming the mouse cursor into the top-left corner (`0..4 px`) immediately halts active clicking loops.
+- **Rich Click Customization**: Left / right / middle button, single / double click, randomized pixel jitter radius, configurable pre-click delay (`min..max ms`), and post-click cursor restoration.
+- **Scriptable CLI & Offline Screenshot Testing**: Scan live displays or saved screenshots (`--screenshot`) with `--templates-dir`, `--threshold`, `--interval`, `--max-clicks`, and `--json`.
 
-## Install
+---
+
+## Installation
+
 ```bash
 python -m venv .venv
 .\.venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-## Run
+---
+
+## Usage
+
+### 1. Launch Desktop GUI (Default)
+
 ```bash
 python image_clicker.py
 ```
 
-## How It Works
-1. Capture a template from the screen.
-2. The app converts the template to grayscale and stores it on disk.
-3. Every 2 seconds, the full screen is captured and compared using `matchTemplate`.
-4. When a match exceeds the threshold, a click action is performed.
+#### Global Hotkeys (GUI Mode)
+- `F1`: Toggle periodic auto right-click.
+- `F2`: Copy current cursor `(X, Y)` into manual target fields.
+- `F3`: Start / Stop template matching.
+- **Top-Left `(0, 0)` Corner**: Emergency fail-safe stop.
 
-## Hotkeys
-- F1: Toggle auto right-click.
-- F2: Copy current cursor position into the manual X/Y fields.
-- F3: Toggle matching.
+### 2. Headless CLI & Dry-Run Mode
 
-## Configuration
-Settings are stored in `config.json`. Each template includes:
-- `threshold`: Match score (0.0 - 1.0).
-- `click_mode`: `match` or `manual`.
-- `manual_x`, `manual_y`: Used when `click_mode` is `manual`.
-- `button`: `left`, `right`, `middle`.
-- `click_type`: `single` or `double`.
-- `jitter_enabled`, `jitter_radius`: Random offset in pixels.
-- `click_delay_min_ms`, `click_delay_max_ms`, `click_delay_random`.
-- `enabled`: Template on/off.
-- `stop_all_on_match`: Stop matching after this template triggers.
-- `after_click_mode`: `restore` or `manual`.
-- `after_click_x`, `after_click_y`: Used when `after_click_mode` is `manual`.
+```bash
+# Dry-run a directory queue of templates against the live screen (preview coordinates only)
+python image_clicker.py --templates-dir ./buttons --threshold 0.85 --interval 1.0 --dry-run --max-scans 5
 
-## Notes
-- The app masks its own window during matching to reduce self-matches.
-- Higher thresholds reduce false positives but may miss noisy templates.
+# Offline CI / calibration check against a saved screenshot with structured JSON output
+python image_clicker.py --screenshot ./screen.png --template ./ok_btn.png --dry-run --json
+
+# Automated live clicking (stops after first match)
+python image_clicker.py --template ./confirm.png --threshold 0.9 --stop-on-match
+```
+
+---
+
+## Running Tests
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+---
 
 ## License
+
 MIT. See `LICENSE`.
